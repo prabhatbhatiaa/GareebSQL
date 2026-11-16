@@ -34,3 +34,10 @@ mysql -u root -p -t < sql/03_project_queries.sql
     </td>
   </tr>
 </table>
+
+## 4. Views and Security (`04_views_and_security.sql`)
+**Run:**
+```powershell
+mysql -u root -p -t < sql/04_views_and_security.sql
+```
+![Views and Security](screenshots/04_views_and_security.png)
