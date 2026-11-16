@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GareebSQL — Relational Banking Ledger</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="topbar">
+        <div class="brand">
+            <span class="logo-mark">G/SQL</span>
+            <div>
+                <h1>GareebSQL</h1>
+                <p class="subtitle">BCNF Relational Banking &amp; ACID Transaction Engine</p>
+            </div>
+        </div>
+
+        <div class="header-actions">
+            <button id="theme-toggle" class="icon-btn" type="button" aria-label="Toggle color theme">
+                <span id="theme-label">LIGHT MODE</span>
+            </button>
+            <a href="https://github.com/prabhatbhatiaa/GareebSQL" target="_blank" rel="noopener noreferrer" class="gh-link">
+                GITHUB REPO ↗
+            </a>
+        </div>
+    </header>
+
+    <nav class="subnav">
+        <div class="nav-inner">
+            <button class="tab-btn active" data-tab="ledger">01 / LEDGER &amp; VIEWS</button>
+            <button class="tab-btn" data-tab="transfer">02 / ACID TRANSFER</button>
+            <button class="tab-btn" data-tab="statements">03 / WINDOW STATEMENTS</button>
+            <button class="tab-btn" data-tab="analytics">04 / CTE &amp; JOINS</button>
+            <button class="tab-btn" data-tab="architecture">05 / SYSTEM &amp; FLOW</button>
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- TAB 01: LEDGER & VIEWS -->
+        <section id="ledger" class="tab-content active">
+            <div class="kpi-strip" id="stats-grid"></div>
+
+            <div class="panel">
+                <div class="panel-head">
+                    <div>
+                        <h2>Accounts Directory</h2>
+                        <p class="panel-desc">Live join across normalized customer, branch, and account relations.</p>
+                    </div>
+                    <code class="sql-pill">INNER JOIN accounts · customers · branches</code>
+                </div>
+                <div class="table-wrap">
+                    <table id="accounts-table">
+                        <thead>
+                            <tr>
+                                <th>Account No</th>
+                                <th>Holder</th>
+                                <th>Branch</th>
+                                <th>Type</th>
+                                <th class="num">Balance</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="split-grid">
+                <div class="panel">
+                    <div class="panel-head">
+                        <div>
+                            <h2>Customer Balance Summary</h2>
+                            <p class="panel-desc">Aggregated deposits per customer via database view.</p>
+                        </div>
+                        <code class="sql-pill">VIEW customer_balance_summary</code>
+                    </div>
+                    <div class="table-wrap">
+                        <table id="customer-view-table">
+                            <thead>
+                                <tr>
+                                    <th>Customer</th>
+                                    <th>City</th>
+                                    <th class="num">Accounts</th>
+                                    <th class="num">Total Balance</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-head">
+                        <div>
+                            <h2>Loan Portfolio Summary</h2>
+                            <p class="panel-desc">Principal vs. installment repayments tracked in real time.</p>
+                        </div>
+                        <code class="sql-pill">VIEW loan_portfolio_summary</code>
+                    </div>
+                    <div class="table-wrap">
+                        <table id="loan-view-table">
+                            <thead>
+                                <tr>
+                                    <th>Borrower</th>
+                                    <th>Type</th>
+                                    <th class="num">Principal</th>
+                                    <th class="num">Paid</th>
+                                    <th class="num">Remaining</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 02: ACID TRANSFER -->
+        <section id="transfer" class="tab-content">
+            <div class="split-grid">
+                <div class="panel">
+                    <div class="panel-head">
+                        <div>
+                            <h2>Execute Atomic Fund Transfer</h2>
+                            <p class="panel-desc">Locks sender &amp; receiver rows, validates constraints, and commits or rolls back.</p>
+                        </div>
+                        <code class="sql-pill">START TRANSACTION · FOR UPDATE</code>
+                    </div>
+                    <form id="transfer-form">
+                        <div class="form-row">
+                            <label for="from-account">Source Account (Debit)</label>
+                            <select id="from-account" required></select>
+                        </div>
+                        <div class="form-row">
+                            <label for="to-account">Destination Account (Credit)</label>
+                            <select id="to-account" required></select>
+                        </div>
+                        <div class="form-row">
+                            <label for="amount">Transfer Amount (INR)</label>
+                            <input type="number" id="amount" min="1" step="0.01" placeholder="5000.00" required>
+                        </div>
+                        <div class="form-row">
+                            <label for="remarks">Audit Remarks</label>
+                            <input type="text" id="remarks" placeholder="Rent split / Vendor settlement">
+                        </div>
+                        <button type="submit" class="action-btn">COMMIT TRANSACTION →</button>
+                    </form>
+                    <div id="transfer-feedback" class="feedback hidden"></div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-head">
+                        <div>
+                            <h2>ACID Guarantees Under the Hood</h2>
+                            <p class="panel-desc">How MySQL 8.0 protects every rupee during this transfer.</p>
+                        </div>
+                        <code class="sql-pill">TCL + CHECK CONSTRAINTS</code>
+                    </div>
+                    <div class="checklist">
+                        <div class="check-item">
+                            <span class="step-num">A</span>
+                            <div>
+                                <strong>Atomicity (All or Nothing)</strong>
+                                <p>Debit, credit, <code>Transfer_Out</code>, and <code>Transfer_In</code> execute inside one transaction block. Any failure triggers <code>ROLLBACK</code>.</p>
+                            </div>
+                        </div>
+                        <div class="check-item">
+                            <span class="step-num">C</span>
+                            <div>
+                                <strong>Consistency (Domain Rules)</strong>
+                                <p>Enforced via <code>CHECK (balance &gt;= 0)</code>, <code>CHECK (amount &gt; 0)</code>, and active account status checks before updating.</p>
+                            </div>
+                        </div>
+                        <div class="check-item">
+                            <span class="step-num">I</span>
+                            <div>
+                                <strong>Isolation (Row-Level Locks)</strong>
+                                <p><code>SELECT ... FOR UPDATE</code> prevents concurrent double-spending race conditions on the sender's balance.</p>
+                            </div>
+                        </div>
+                        <div class="check-item">
+                            <span class="step-num">D</span>
+                            <div>
+                                <strong>Durability (InnoDB Redo Log)</strong>
+                                <p>Once <code>COMMIT</code> returns, updated balances and ledger entries persist permanently in MySQL.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 03: WINDOW STATEMENTS -->
+        <section id="statements" class="tab-content">
+            <div class="panel">
+                <div class="panel-head">
+                    <div>
+                        <h2>Account Ledger &amp; Running Balance</h2>
+                        <p class="panel-desc">Partitioned running balance computed directly in SQL without mutating stored rows.</p>
+                    </div>
+                    <div class="inline-controls">
+                        <code class="sql-pill">SUM() OVER (PARTITION BY account_id)</code>
+                        <select id="statement-filter" aria-label="Filter by account">
+                            <option value="">All Accounts</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-wrap">
+                    <table id="statements-table">
+                        <thead>
+                            <tr>
+                                <th>Txn ID</th>
+                                <th>Account</th>
+                                <th>Holder</th>
+                                <th>Type</th>
+                                <th class="num">Amount</th>
+                                <th class="num">Running Balance</th>
+                                <th>Timestamp</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 04: CTE & JOINS -->
+        <section id="analytics" class="tab-content">
+            <div class="split-grid">
+                <div class="panel">
+                    <div class="panel-head">
+                        <div>
+                            <h2>Customer Liquidity Ranking</h2>
+                            <p class="panel-desc">Dense ranking across combined Savings and Current accounts.</p>
+                        </div>
+                        <code class="sql-pill">DENSE_RANK() OVER</code>
+                    </div>
+                    <div class="table-wrap">
+                        <table id="ranking-table">
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Customer</th>
+                                    <th class="num">Total Liquidity</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-head">
+                        <div>
+                            <h2>Monthly Net Cash Flow</h2>
+                            <p class="panel-desc">Inflows vs. outflows aggregated via Common Table Expression.</p>
+                        </div>
+                        <code class="sql-pill">WITH monthly_flow AS (...)</code>
+                    </div>
+                    <div class="table-wrap">
+                        <table id="cashflow-table">
+                            <thead>
+                                <tr>
+                                    <th>Month</th>
+                                    <th class="num">Inflow</th>
+                                    <th class="num">Outflow</th>
+                                    <th class="num">Net Flow</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="split-grid">
+                <div class="panel">
+                    <div class="panel-head">
+                        <div>
+                            <h2>Debt-Free Customers</h2>
+                            <p class="panel-desc">Customers with zero loan records in the system.</p>
+                        </div>
+                        <code class="sql-pill">LEFT OUTER JOIN · IS NULL</code>
+                    </div>
+                    <div class="table-wrap">
+                        <table id="debtfree-table">
+                            <thead>
+                                <tr>
+                                    <th>Customer ID</th>
+                                    <th>Full Name</th>
+                                    <th>City</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-head">
+                        <div>
+                            <h2>Customer Referral Network</h2>
+                            <p class="panel-desc">Recursive self-join mapping who referred each customer.</p>
+                        </div>
+                        <code class="sql-pill">SELF JOIN customers</code>
+                    </div>
+                    <div class="table-wrap">
+                        <table id="referral-table">
+                            <thead>
+                                <tr>
+                                    <th>Customer</th>
+                                    <th>Referred By</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 05: SYSTEM & FLOW -->
+        <section id="architecture" class="tab-content">
+            <div class="panel">
+                <div class="panel-head">
+                    <div>
+                        <h2>System Architecture &amp; Execution Flow</h2>
+                        <p class="panel-desc">End-to-end relational banking design built for DBMS Capstone evaluation.</p>
+                    </div>
+                    <a href="https://github.com/prabhatbhatiaa/GareebSQL" target="_blank" rel="noopener noreferrer" class="sql-pill">github.com/prabhatbhatiaa/GareebSQL ↗</a>
+                </div>
+
+                <div class="flow-pipeline">
+                    <div class="flow-node">
+                        <span class="flow-tag">LAYER 01 · SCHEMA</span>
+                        <h3>BCNF Normalized Model</h3>
+                        <p>6 tables (<code>branches</code>, <code>customers</code>, <code>accounts</code>, <code>transactions</code>, <code>loans</code>, <code>loan_payments</code>) decomposed from UNF → 1NF → 2NF → 3NF → BCNF with strict PK, FK, UNIQUE, and CHECK constraints.</p>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-node">
+                        <span class="flow-tag">LAYER 02 · ENGINE</span>
+                        <h3>MySQL 8.0 Core</h3>
+                        <p>Executes composite indexes (<code>idx_txn_account_date</code>), read-only views, DCL privilege roles (<code>bank_teller</code>, <code>auditor_readonly</code>), window functions, CTEs, and ACID transactions.</p>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-node">
+                        <span class="flow-tag">LAYER 03 · BRIDGE</span>
+                        <h3>FastAPI Raw SQL API</h3>
+                        <p>Lightweight Python REST bridge running parameterized raw SQL queries without ORM abstraction so every query remains transparent and auditable.</p>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-node">
+                        <span class="flow-tag">LAYER 04 · CLIENT</span>
+                        <h3>Interactive Ledger UI</h3>
+                        <p>Zero-dependency HTML/CSS/JS frontend with live theme switching, real-time running statements, and atomic transfer testing.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="split-grid">
+                <div class="panel">
+                    <div class="panel-head">
+                        <div>
+                            <h2>Repository &amp; SQL Script Map</h2>
+                            <p class="panel-desc">Structured workflow documented in the GitHub repository.</p>
+                        </div>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>File</th>
+                                    <th>Syllabus Coverage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><code>docs/ER_Diagram.md</code></td><td>Entity-Relationship Model &amp; Cardinality</td></tr>
+                                <tr><td><code>docs/Relational_Model.md</code></td><td>Primary Keys, Foreign Keys &amp; Domain Constraints</td></tr>
+                                <tr><td><code>docs/Normalization.md</code></td><td>Step-by-Step 1NF → 2NF → 3NF → BCNF Proof</td></tr>
+                                <tr><td><code>sql/01_create_tables.sql</code></td><td>DDL Schema &amp; Integrity Constraints</td></tr>
+                                <tr><td><code>sql/02_insert_data.sql</code></td><td>DML (INSERT, UPDATE, DELETE)</td></tr>
+                                <tr><td><code>sql/03_project_queries.sql</code></td><td>Joins, Subqueries, Set Ops, Window Functions &amp; CTEs</td></tr>
+                                <tr><td><code>sql/04_views_and_security.sql</code></td><td>Views, Indexes + EXPLAIN, DCL &amp; TCL</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-head">
+                        <div>
+                            <h2>Project Info</h2>
+                            <p class="panel-desc">Academic &amp; technical metadata.</p>
+                        </div>
+                    </div>
+                    <div class="meta-list">
+                        <div class="meta-row"><span>Project Name</span><strong>GareebSQL</strong></div>
+                        <div class="meta-row"><span>Developer</span><strong>Prabhat Bhatia (B.Tech CSE — Cyber Security)</strong></div>
+                        <div class="meta-row"><span>Database</span><strong>MySQL 8.0 (InnoDB Storage Engine)</strong></div>
+                        <div class="meta-row"><span>Backend Stack</span><strong>Python · FastAPI · mysql-connector</strong></div>
+                        <div class="meta-row"><span>Source Code</span><a href="https://github.com/prabhatbhatiaa/GareebSQL" target="_blank" rel="noopener noreferrer">github.com/prabhatbhatiaa/GareebSQL ↗</a></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <span>GareebSQL · DBMS Capstone Project</span>
+        <span>Built by Prabhat Bhatia · <a href="https://github.com/prabhatbhatiaa/GareebSQL" target="_blank" rel="noopener noreferrer">View Source on GitHub ↗</a></span>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
