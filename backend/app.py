@@ -20,13 +20,16 @@ app.add_middleware(
 
 def get_connection():
     try:
-        return mysql.connector.connect(
-            host=os.getenv("DB_HOST", "localhost"),
-            port=int(os.getenv("DB_PORT", 3306)),
-            user=os.getenv("DB_USER", "root"),
-            password=os.getenv("DB_PASSWORD", ""),
-            database=os.getenv("DB_NAME", "gareeb_sql"),
-        )
+        config = {
+            "host": os.getenv("DB_HOST", "localhost"),
+            "port": int(os.getenv("DB_PORT", 3306)),
+            "user": os.getenv("DB_USER", "root"),
+            "password": os.getenv("DB_PASSWORD", ""),
+            "database": os.getenv("DB_NAME", "gareeb_sql"),
+        }
+        if os.getenv("DB_SSL", "false").lower() == "true":
+            config["ssl_disabled"] = False
+        return mysql.connector.connect(**config)
     except Error as err:
         raise HTTPException(status_code=500, detail=f"Database connection failed: {err}")
 
