@@ -46,6 +46,7 @@ def health():
         "status": "running",
         "random": "Hello World This is Prabhat Bhatia"
     }
+    
 
 @app.get("/api/dashboard")
 def get_dashboard():
