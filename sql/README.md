@@ -3,7 +3,7 @@
 
 ---
 
-## 1. Create Tables (`create_tables.sql`)
+## 1. Create Tables (`01_create_tables.sql`)
 **Run:**
 ```powershell
 mysql -u root -p < sql/create_tables.sql
@@ -11,7 +11,7 @@ mysql -u root -p -e "USE gareeb_sql; SHOW TABLES;"
 ```
 ![Create Tables](screenshots/01_create_tables.png)
 
-## 2. Insert Data (`insert_data.sql`)
+## 2. Insert Data (`02_insert_data.sql`)
 **Run:**
 ```powershell
 mysql -u root -p < sql/02_insert_data.sql
