@@ -18,3 +18,19 @@ mysql -u root -p < sql/02_insert_data.sql
 mysql -u root -p -e "USE gareeb_sql; SELECT * FROM customers; SELECT * FROM accounts;"
 ```
 ![Insert Data](screenshots/02_insert_data.png)
+
+## 3. Core & Analytical Queries (`03_project_queries.sql`)
+**Run:**
+```powershell
+mysql -u root -p -t < sql/03_project_queries.sql
+```
+<table>
+  <tr>
+    <td align="center">
+      <img src="screenshots/03_project_queries_1.png" width="100%" alt="Core Queries Screenshot 1">
+    </td>
+    <td align="center">
+      <img src="screenshots/03_project_queries_2.png" width="100%" alt="Core Queries Screenshot 2">
+    </td>
+  </tr>
+</table>
