@@ -39,13 +39,13 @@ class TransferRequest(BaseModel):
     amount: float = Field(..., gt=0)
     remarks: str = "Online fund transfer"
 
-# @app.get("/")
-# def home():
-#     return {
-#         "message": "Welcome to GareebSQL FastAPI Backend",
-#         "status": "running",
-#         "random": "Hello World This is Prabhat Bhatia"
-#     }
+@app.get("/health")
+def health():
+    return {
+        "message": "Welcome to GareebSQL FastAPI Backend",
+        "status": "running",
+        "random": "Hello World This is Prabhat Bhatia"
+    }
 
 @app.get("/api/dashboard")
 def get_dashboard():
