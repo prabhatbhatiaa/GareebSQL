@@ -12,7 +12,25 @@ In the relational model, each entity from the ER diagram is mapped to a relation
 
 ---
 
-## 2. Detailed Table-by-Table Key & Constraint Specification
+## 2. Detailed Table-by-Table Key & Constraint Specification with Diagram
+
+```mermaid
+flowchart TB
+    B["<b>branches</b><br/><u>branch_id (PK)</u> | branch_name | city | ifsc_code (UK)"]
+    C["<b>customers</b><br/><u>customer_id (PK)</u> | full_name | email (UK) | phone (UK) | city | referred_by (FK) | joined_date"]
+    A["<b>accounts</b><br/><u>account_id (PK)</u> | customer_id (FK) | branch_id (FK) | account_number (UK) | account_type | balance | status | opened_date"]
+    T["<b>transactions</b><br/><u>transaction_id (PK)</u> | account_id (FK) | related_account_id (FK) | type | amount | txn_date | remarks"]
+    L["<b>loans</b><br/><u>loan_id (PK)</u> | customer_id (FK) | branch_id (FK) | loan_type | principal_amount | interest_rate | status | issued_date"]
+    LP["<b>loan_payments</b><br/><u>payment_id (PK)</u> | loan_id (FK) | amount_paid | payment_date"]
+
+    C -->|referred_by| C
+    C -->|customer_id| A
+    B -->|branch_id| A
+    A -->|account_id / related_account_id| T
+    C -->|customer_id| L
+    B -->|branch_id| L
+    L -->|loan_id| LP
+```
 
 ### Table 1: `branches`
 | Column Name | Data Type | Key Type | Constraints & Purpose |
